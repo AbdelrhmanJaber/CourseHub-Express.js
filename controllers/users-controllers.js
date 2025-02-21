@@ -5,6 +5,7 @@ const appError = require("../utils/appError");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const generate_JWT = require("../utils/generate_jwt");
+const userRoles = require("../utils/user_roles");
 require("dotenv").config();
 
 const getAllUsers = asynchWrapper(async (req, res) => {
@@ -19,9 +20,16 @@ const getAllUsers = asynchWrapper(async (req, res) => {
 const register = asynchWrapper(async (req, res, next) => {
   try {
     const newUser = new User(req.body);
+    if (!Object.values(userRoles).includes(newUser.role)) {
+      return next(appError.create("Not a valid role", 400, httpStatus.ERROR));
+    }
     newUser.password = await bcrypt.hash(newUser.password, 10);
     // generate JWT Token
-    const token = await generate_JWT({ email: newUser.email, id: newUser._id });
+    const token = await generate_JWT({
+      email: newUser.email,
+      id: newUser._id,
+      role: newUser.role,
+    });
     newUser.token = token;
     await newUser.save();
     res.status(201).json({ status: httpStatus.SUCCESS, data: { newUser } });
@@ -62,7 +70,11 @@ const login = asynchWrapper(async (req, res, next) => {
   } else {
     const matchedPassword = await bcrypt.compare(password, user.password);
     if (matchedPassword) {
-      const token = await generate_JWT({ email: user.email, id: user._id });
+      const token = await generate_JWT({
+        email: user.email,
+        id: user._id,
+        role: user.role,
+      });
       res.json({
         status: httpStatus.SUCCESS,
         data: { token },

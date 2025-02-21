@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const userRoles = require("../utils/user_roles");
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -22,6 +23,11 @@ const userSchema = new mongoose.Schema({
   },
   token: {
     type: String,
+  },
+  role: {
+    type: String,
+    enum: [userRoles.USER, userRoles.ADMIN, userRoles.MANAGER],
+    default: userRoles.USER,
   },
 });
 
