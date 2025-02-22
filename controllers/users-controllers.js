@@ -3,7 +3,6 @@ const User = require("../models/users-models");
 const httpStatus = require("../utils/https_status_text");
 const appError = require("../utils/appError");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const generate_JWT = require("../utils/generate_jwt");
 const userRoles = require("../utils/user_roles");
 require("dotenv").config();
@@ -86,8 +85,18 @@ const login = asynchWrapper(async (req, res, next) => {
   }
 });
 
+const deleteUser = asynchWrapper(async (req, res, next) => {
+  const data = await User.findOneAndDelete({ _id: req.params.userID });
+  if (!data) {
+    const error = appError.create("User is not found", 404, httpStatus.ERROR);
+    return next(error);
+  }
+  res.status(200).json({ status: httpStatus.SUCCESS, data: null });
+});
+
 module.exports = {
   getAllUsers,
   register,
   login,
+  deleteUser,
 };

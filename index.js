@@ -1,7 +1,9 @@
 require("dotenv").config();
+const httpStatus = require("./utils/https_status_text");
+const courseRouter = require("./routes/courses-routes");
+const userRouter = require("./routes/users-routes");
 const express = require("express");
 const mongoose = require("mongoose");
-const httpStatus = require("./utils/https_status_text");
 const cors = require("cors");
 const app = express();
 const url = process.env.mongo_URL;
@@ -13,9 +15,6 @@ mongoose.connect(url).then(() => {
 app.use(cors());
 
 app.use(express.json());
-
-const courseRouter = require("./routes/courses-routes");
-const userRouter = require("./routes/users-routes");
 
 app.use("/api/courses", courseRouter);
 app.use("/api/users", userRouter);
